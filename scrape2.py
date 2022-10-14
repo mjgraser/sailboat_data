@@ -39,7 +39,7 @@ def db_connect():
     return engine
 
 
-def mr_clean(text):
+def strip_whitespace(text):
     
     return clean(text=text,
             fix_unicode=True,
@@ -78,8 +78,6 @@ def get_boats():
         #Run my query 
         result = connection.execute(text("select user from mysql.user"))
         
-        print (result)
-        
     for loc in locs:
        url = loc.text
        if "/sailboat/" in url:
@@ -92,23 +90,43 @@ boats = get_boats()
 # print(xml)
 # print(len(xml))
 # =============================================================================
-boats.pop(0)
+boats.pop(3)
 #remove first cause its a bad link
 for boat in boats:
-   print(boat)
+
    url = boat
+   print(url)
    page = urlopen(url)
-   html = page.read().decode("utf-8")
-   soup = BeautifulSoup(html, "html.parser")
-   sitetxt = soup.get_text()
-   squeaky = mr_clean(sitetxt)
-
-   print(squeaky)
-#   with open('cleaned.txt', 'w') as f:
- #      print(sitetxt, file=f)
+   raw_html = page.read().decode("utf-8")
+   parsed_html = BeautifulSoup(raw_html, "html.parser")
+   dirty_text = parsed_html.get_text()
    
-   break
+   no_whitespace_text = strip_whitespace(dirty_text)
+   
+   #find the character number where this is (everything before it isn't uselful)
+   start_delimiter =("compare\nback\n")
+   start_index = no_whitespace_text.find(start_delimiter)
+   #same as above
+   end_delimiter =("\nsailboat links\n")
+   end_index = no_whitespace_text.find(end_delimiter)
+   
+   #remove all the junk before compare\nback and after sailboat links
+   no_whitespace_text = no_whitespace_text[start_index+len(start_delimiter):end_index]
 
+   #Split on new lines - creates a list based on the delimiter character
+   results = no_whitespace_text.split('\n')
+   #Remove the second (don't forget Zero index) to 4 (5 is not inclusive)
+   del results[1:5]
+   print(no_whitespace_text)
+   title = results.pop(0)
+
+   
+
+
+#   with open('cleaned.txt', 'w') as f:
+#      print(sitetxt, file=f)
+   break
+#test
 
 
 
