@@ -90,7 +90,7 @@ boats = get_boats()
 # print(xml)
 # print(len(xml))
 # =============================================================================
-boats.pop(3)
+boats.pop(0)
 #remove first cause its a bad link
 for boat in boats:
 
@@ -113,15 +113,29 @@ for boat in boats:
    #remove all the junk before compare\nback and after sailboat links
    no_whitespace_text = no_whitespace_text[start_index+len(start_delimiter):end_index]
 
+   ## get all the headers for a page
+   #use regex to define headers 
+   pattern = r"[a-zA-Z./ ()#]{1,}:\n"
+   headers = re.findall(pattern , no_whitespace_text)
+   
    #Split on new lines - creates a list based on the delimiter character
    results = no_whitespace_text.split('\n')
-   #Remove the second (don't forget Zero index) to 4 (5 is not inclusive)
-   del results[1:5]
-   print(no_whitespace_text)
-   title = results.pop(0)
-
    
 
+   
+   for header in headers:
+       #Remove newline character since our string doesn't have it 
+       header = header.strip('\n')
+       #get the line number of the header
+       header_line = results.index(header)
+       #data is on the next line
+       data = results[header_line + 1]
+       
+   
+
+
+
+    # loop headers through no_whitespace_text
 
 #   with open('cleaned.txt', 'w') as f:
 #      print(sitetxt, file=f)
