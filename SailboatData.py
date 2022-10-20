@@ -26,6 +26,7 @@ Created on Thu Aug 11 15:48:54 2022
 
 from bs4 import BeautifulSoup
 from urllib.request import urlopen
+from urllib.error import HTTPError
 from sqlalchemy import text
 from cleantext import clean
 import requests, sqlalchemy
@@ -92,11 +93,27 @@ boats = get_boats()
 # =============================================================================
 boats.pop(0)
 #remove first cause its a bad link
-for boat in boats:
 
+#temporary limit to num pages
+limit = 60
+boat_num = 0
+schema = (set())
+
+for boat in boats:
+   if boat_num > limit:
+       break
+   boat_num = boat_num + 1
+   
    url = boat
    print(url)
-   page = urlopen(url)
+   try:
+       page = urlopen(url)
+   except HTTPError:
+       #page can't open, we don't really care
+       pass
+   
+       
+   
    raw_html = page.read().decode("utf-8")
    parsed_html = BeautifulSoup(raw_html, "html.parser")
    dirty_text = parsed_html.get_text()
@@ -121,8 +138,11 @@ for boat in boats:
    #Split on new lines - creates a list based on the delimiter character
    results = no_whitespace_text.split('\n')
    
-
    
+      
+#keep a set list of headers to later create a master schema from
+
+
    for header in headers:
        #Remove newline character since our string doesn't have it 
        header = header.strip('\n')
@@ -130,16 +150,15 @@ for boat in boats:
        header_line = results.index(header)
        #data is on the next line
        data = results[header_line + 1]
-       
-   
-
+            
+       schema.add(header)
 
 
     # loop headers through no_whitespace_text
 
 #   with open('cleaned.txt', 'w') as f:
 #      print(sitetxt, file=f)
-   break
+print(schema)
 #test
 
 
